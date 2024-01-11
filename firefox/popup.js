@@ -46,7 +46,7 @@ browser.storage.local.get(["min_frequency"], (min_value) => {
 	document.getElementById("min_value").innerHTML = min_value["min_frequency"];
 });
 
-document.getElementById('max_slider').onchange = max_slider;
-document.getElementById('min_slider').onchange = min_slider;
-document.getElementById('enhancer').onchange = enhancer;
+document.getElementById('max_slider').oninput = max_slider;
+document.getElementById('min_slider').oninput = min_slider;
+document.getElementById('enhancer').oninput = enhancer;
 document.getElementById('reload_button').onclick = reload;
