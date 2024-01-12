@@ -4,12 +4,28 @@
 //recommended min: 80 Hz
 //recommended max: 15000 Hz
 //Voice frequency: 85 and 180Hz
+let contexes = [];
+
+window.onload = () => {
+	let audios = Array.from(document.getElementsByTagName('audio'));
+	let videos = Array.from(document.getElementsByTagName('video'));
+
+	for (let i = 0; i < audios.length; i++) {
+		filter(audios[i])
+	}
+
+	for (let i = 0; i < videos.length; i++) {
+		filter(videos[i])
+	}
+}
+
+
 
 async function filter(instance) {
 	const enabled = true;
 	const voiceBoost = await browser.storage.local.get(["enhancer"]);
-	console.log(voiceBoost["enhancer"]);
 	const context = new AudioContext();
+	contexes.push(context);
 
 	const lowpass = context.createBiquadFilter();
 	lowpass.type = "lowpass";
@@ -32,7 +48,6 @@ async function filter(instance) {
 		const filter1 = source.connect(lowpass);
 		const filter2 = filter1.connect(highpass);
 		if (voiceBoost["enhancer"] == true) {
-			console.log("VOICE ENHANCE ON");
 			const filter3 = filter2.connect(peaking);
 			filter3.connect(context.destination);
 		} else {
@@ -42,27 +57,37 @@ async function filter(instance) {
 	}
 }
 
-document.body.onclick = () => {
-Array.from(document.getElementsByTagName('audio')).forEach(audio => {
-	filter(audio)
-	console.log("YO")
+chrome.runtime.onMessage.addListener(msgObj => {
+	if (msgObj == "reset") {
+		reset();
+	}
 });
 
-Array.from(document.getElementsByTagName('video')).forEach(video => {
-	filter(video)
-	console.log("YO")
-});
+document.body.onmousemove = () => {
+	for (let i = 0; i < contexes.length; i++) {
+		contexes[i].resume()
+	}
 }
 
-Array.from(document.getElementsByTagName('audio')).forEach(audio => {
-	filter(audio)
-	console.log("YO")
-});
+function reset() {
+	for (let i = 0; i < contexes.length; i++) {
+		contexes[i].close()
+	}
+	
+	contexes = []
+	
+	let audios = Array.from(document.getElementsByTagName('audio'));
+	let videos = Array.from(document.getElementsByTagName('video'));
 
-Array.from(document.getElementsByTagName('video')).forEach(video => {
-	filter(video)
-	console.log("YO")
-});
+	for (let i = 0; i < audios.length; i++) {
+		filter(audios[i])
+	}
+
+	for (let i = 0; i < videos.length; i++) {
+		filter(videos[i])
+	}
+}
+
 
 //https://stackoverflow.com/questions/22233037/how-to-apply-basic-audio-filter-using-javascript
 //https://stackoverflow.com/questions/16949768/how-can-i-reduce-the-noise-of-a-microphone-input-with-the-web-audio-api

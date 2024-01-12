@@ -31,22 +31,28 @@ function enhancer() {
 	}
 }
 
-function reload() {
-	chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
-		chrome.tabs.reload(arrayOfTabs[0].id);
-	});
-}
-
 browser.storage.local.get(["max_frequency"], (max_value) => {
 	document.getElementById("max_slider").value = max_value["max_frequency"];
 	document.getElementById("max_value").innerHTML = max_value["max_frequency"];
 });
+
 browser.storage.local.get(["min_frequency"], (min_value) => {
 	document.getElementById("min_slider").value = min_value["min_frequency"];
 	document.getElementById("min_value").innerHTML = min_value["min_frequency"];
 });
 
+function apply_settings() {
+	chrome.tabs.query({}, tabs => {
+		tabs.forEach(tab => {
+		chrome.tabs.sendMessage(tab.id, "reset");
+	  });
+	});
+}
+
 document.getElementById('max_slider').oninput = max_slider;
 document.getElementById('min_slider').oninput = min_slider;
 document.getElementById('enhancer').oninput = enhancer;
-document.getElementById('reload_button').onclick = reload;
+
+document.getElementById('max_slider').onchange = apply_settings;
+document.getElementById('min_slider').onchange = apply_settings;
+document.getElementById('enhancer').onchange = apply_settings;
