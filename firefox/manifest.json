@@ -1,23 +1,23 @@
 {
-  "manifest_version": 2,
-  "name": "Frequency Limiter",
-  "version": "1.0",
-  "description": "An extension that enables users to tune out low/high frequencies that they might be sensitive to.",
-  "content_scripts": [
-    {
-      "matches": ["*://*/*"],
-      "js": ["filter.js"],
-	  "all_frames": true
+    "manifest_version": 2,
+    "name": "Frequency Limiter",
+    "version": "1.0",
+    "description": "An extension that enables users to tune out low/high frequencies that they might be sensitive to.",
+    "content_scripts": [
+        {
+          "matches": ["*://*/*"],
+          "js": ["filter.js"],
+          "all_frames": true
+        }
+    ],
+    "permissions": ["storage"],
+    "browser_action": {
+        "default_title": "Frequency Limiter Parameters",
+        "default_popup": "menu.html"
+    },
+    "background": {
+    "scripts": ["background.js"],
+    "persistent": false,
+    "type": "module"
     }
-  ],
-  "permissions": ["storage"],
-  "browser_action": {
-    "default_title": "Frequency Limiter Parameters",
-    "default_popup": "menu.html"
-  },
-  "background": {
-  "scripts": ["background.js"],
-  "persistent": false,
-  "type": "module"
-  }
 }

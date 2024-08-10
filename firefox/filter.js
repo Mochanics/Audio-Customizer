@@ -13,11 +13,25 @@ window.onload = () => { //On page load, finds all the video and audio elements a
     let videos = Array.from(document.getElementsByTagName('video'));
 
     for (let i = 0; i < audios.length; i++) {
-        filter(audios[i])
+        filter(audios[i]);
+        
+        //Starts the contexts when an audio source plays
+        audios[i].onplay = () => {
+            for (let i = 0; i < contexts.length; i++) {
+                contexts[i].resume();
+            }    
+        }
     }
 
     for (let i = 0; i < videos.length; i++) {
-        filter(videos[i])
+        filter(videos[i]);
+        
+        //Starts the contexts when an video source plays
+        videos[i].onplay = () => {
+            for (let i = 0; i < contexts.length; i++) {
+                contexts[i].resume();
+            }    
+        }
     }
 }
 
@@ -90,11 +104,11 @@ chrome.runtime.onMessage.addListener(msgObj => {
 });
 
 //Forced to do this because browsers automatically pause audio contexts without user gestures. Trying to find a workaround but this might work well enough. Might still generate a few console warnings though.
-document.body.onclick = () => {
-    for (let i = 0; i < contexts.length; i++) {
-        contexts[i].resume()
-    }
-}
+//document.body.onclick = () => {
+//    for (let i = 0; i < contexts.length; i++) {
+//        contexts[i].resume()
+//    }
+//}
 
 //Closes and recreates the audio contexts when the user changes a plugin setting from the settings popup
 function reset() {
