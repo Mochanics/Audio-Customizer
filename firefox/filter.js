@@ -19,8 +19,10 @@ window.onload = () => { //On page load, finds all the video and audio elements a
         audios[i].onplay = () => {
             for (let i = 0; i < contexts.length; i++) {
                 contexts[i].resume();
+                contexts[i].destination.channelCount = 1;
+                
             }    
-        }
+        };
     }
 
     for (let i = 0; i < videos.length; i++) {
@@ -30,10 +32,11 @@ window.onload = () => { //On page load, finds all the video and audio elements a
         videos[i].onplay = () => {
             for (let i = 0; i < contexts.length; i++) {
                 contexts[i].resume();
+                contexts[i].destination.channelCount = 1;
             }    
-        }
+        };
     }
-}
+};
 
 
 
@@ -41,8 +44,8 @@ async function filter(instance) { //Filter creation function
     const enabled = true; //Debug variable - not changed during normal operation
     const voiceBoost = await browser.storage.local.get(["enhancer"]); //Gets the boolean value for whether the voice boost feature is enabled or not
     const context = new AudioContext();
+    
     contexts.push(context);
-
     
     //Creates the daisy-chained lowpass filters
     const lowpass1 = context.createBiquadFilter();
@@ -80,19 +83,29 @@ async function filter(instance) { //Filter creation function
     //Connects the filters in order for the given audio context
     if (enabled == true) {
         const source = context.createMediaElementSource(instance);
-        const instance_lowpass1 = source.connect(lowpass1);
-        const instance_lowpass2 = instance_lowpass1.connect(lowpass2);
-        const instance_lowpass3 = instance_lowpass2.connect(lowpass3);
-        const instance_highpass1 = instance_lowpass3.connect(highpass1);
-        const instance_highpass2 = instance_highpass1.connect(highpass2);
-        const instance_highpass3 = instance_highpass2.connect(highpass3);
-        if (voiceBoost["enhancer"] == true) {
-            const instance_peaking = instance_highpass3.connect(peaking);
-            instance_peaking.connect(context.destination);
+        
+        const mono = await browser.storage.local.get(["mono"]);
+        
+        if (mono["mono"] == true) {
+            context.destination.channelCount = 1;
+            console.log("Mono is active");
         } else {
-            instance_highpass3.connect(context.destination);
+            console.log("Mono is inactive");
         }
-
+        
+        source.connect(lowpass1);
+        lowpass1.connect(lowpass2);
+        lowpass2.connect(lowpass3);
+        lowpass3.connect(highpass1);
+        highpass1.connect(highpass2);
+        highpass2.connect(highpass3);
+        
+        if (voiceBoost["enhancer"] == true) {
+            highpass3.connect(peaking);
+            peaking.connect(context.destination);
+        } else {
+            highpass3.connect(context.destination);
+        }
     }
 }
 
@@ -113,20 +126,20 @@ chrome.runtime.onMessage.addListener(msgObj => {
 //Closes and recreates the audio contexts when the user changes a plugin setting from the settings popup
 function reset() {
     for (let i = 0; i < contexts.length; i++) {
-        contexts[i].close()
+        contexts[i].close();
     }
     
-    contexts = []
+    contexts = [];
     
     let audios = Array.from(document.getElementsByTagName('audio'));
     let videos = Array.from(document.getElementsByTagName('video'));
 
     for (let i = 0; i < audios.length; i++) {
-        filter(audios[i])
+        filter(audios[i]);
     }
 
     for (let i = 0; i < videos.length; i++) {
-        filter(videos[i])
+        filter(videos[i]);
     }
 }
 
