@@ -34,7 +34,7 @@ function enhancer() {
     }
 }
 
-//Gets the value from the from the enhancer checkmark/toggle button and passes it to the stored value
+//Gets the value from the from the mono checkmark/toggle button and passes it to the stored value
 function mono() {
     let value = document.getElementById("mono").checked;
     if (value == true) {
@@ -56,10 +56,12 @@ browser.storage.local.get(["min_frequency"], (min_value) => {
     document.getElementById("min_value").innerHTML = min_value["min_frequency"];
 });
 
+//Gets the value for the  enhancer from storage and passes it to the checkmark/toggle button
 browser.storage.local.get(["enhancer"], (enhancer) => {
     document.getElementById("enhancer").checked = enhancer["enhancer"];
 });
 
+//Gets the value for mono from storage and passes it to the checkmark/toggle button
 browser.storage.local.get(["mono"], (mono) => {
     document.getElementById("mono").checked = mono["mono"];
 });

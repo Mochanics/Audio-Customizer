@@ -84,6 +84,7 @@ async function filter(instance) { //Filter creation function
     if (enabled == true) {
         const source = context.createMediaElementSource(instance);
         
+        //Enables mono output if the setting is set
         const mono = await browser.storage.local.get(["mono"]);
         
         if (mono["mono"] == true) {
