@@ -1,6 +1,5 @@
 //Copyright: Mochanics 2023
 
-//500-10000?
 //recommended min: 80 Hz
 //recommended max: 15000 Hz
 //Voice frequency: 85 and 180Hz
