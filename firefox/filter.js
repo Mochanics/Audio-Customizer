@@ -11,6 +11,8 @@ let contexts = [];
 window.onload = () => { //On page load, finds all the video and audio elements and creates the filter for each one of them
     let audios = Array.from(document.getElementsByTagName('audio'));
     let videos = Array.from(document.getElementsByTagName('video'));
+    
+    const mono = browser.storage.local.get(["mono"]);
 
     for (let i = 0; i < audios.length; i++) {
         filter(audios[i]);
@@ -19,8 +21,10 @@ window.onload = () => { //On page load, finds all the video and audio elements a
         audios[i].onplay = () => {
             for (let i = 0; i < contexts.length; i++) {
                 contexts[i].resume();
-                contexts[i].destination.channelCount = 1;
                 
+                if (mono["mono"] == true) {
+                    contexts[i].destination.channelCount = 1;
+                }
             }    
         };
     }
@@ -32,7 +36,10 @@ window.onload = () => { //On page load, finds all the video and audio elements a
         videos[i].onplay = () => {
             for (let i = 0; i < contexts.length; i++) {
                 contexts[i].resume();
-                contexts[i].destination.channelCount = 1;
+                
+                if (mono["mono"] == true) {
+                    contexts[i].destination.channelCount = 1;
+                }
             }    
         };
     }
@@ -41,7 +48,6 @@ window.onload = () => { //On page load, finds all the video and audio elements a
 
 
 async function filter(instance) { //Filter creation function
-    const enabled = true; //Debug variable - not changed during normal operation
     const voiceBoost = await browser.storage.local.get(["enhancer"]); //Gets the boolean value for whether the voice boost feature is enabled or not
     const context = new AudioContext();
     
@@ -81,32 +87,27 @@ async function filter(instance) { //Filter creation function
     peaking.gain.value = 25;
 
     //Connects the filters in order for the given audio context
-    if (enabled == true) {
         const source = context.createMediaElementSource(instance);
         
-        //Enables mono output if the setting is set
-        const mono = await browser.storage.local.get(["mono"]);
-        
-        if (mono["mono"] == true) {
-            context.destination.channelCount = 1;
-            console.log("Mono is active");
-        } else {
-            console.log("Mono is inactive");
-        }
-        
-        source.connect(lowpass1);
-        lowpass1.connect(lowpass2);
-        lowpass2.connect(lowpass3);
-        lowpass3.connect(highpass1);
-        highpass1.connect(highpass2);
-        highpass2.connect(highpass3);
-        
-        if (voiceBoost["enhancer"] == true) {
-            highpass3.connect(peaking);
-            peaking.connect(context.destination);
-        } else {
-            highpass3.connect(context.destination);
-        }
+    //Enables mono output if the setting is set
+    const mono = await browser.storage.local.get(["mono"]);
+
+    if (mono["mono"] == true) {
+        context.destination.channelCount = 1;   
+    }
+
+    source.connect(lowpass1);
+    lowpass1.connect(lowpass2);
+    lowpass2.connect(lowpass3);
+    lowpass3.connect(highpass1);
+    highpass1.connect(highpass2);
+    highpass2.connect(highpass3);
+
+    if (voiceBoost["enhancer"] == true) {
+        highpass3.connect(peaking);
+        peaking.connect(context.destination);
+    } else {
+        highpass3.connect(context.destination);
     }
 }
 
@@ -116,13 +117,6 @@ chrome.runtime.onMessage.addListener(msgObj => {
         reset();
     }
 });
-
-//Forced to do this because browsers automatically pause audio contexts without user gestures. Trying to find a workaround but this might work well enough. Might still generate a few console warnings though.
-//document.body.onclick = () => {
-//    for (let i = 0; i < contexts.length; i++) {
-//        contexts[i].resume()
-//    }
-//}
 
 //Closes and recreates the audio contexts when the user changes a plugin setting from the settings popup
 function reset() {
