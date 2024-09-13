@@ -7,11 +7,11 @@
 //Context array - stores all audio contexts for the page
 let contexts = [];
 
-window.onload = () => { //On page load, finds all the video and audio elements and creates the filter for each one of them
+window.onload = async () => { //On page load, finds all the video and audio elements and creates the filter for each one of them
     let audios = Array.from(document.getElementsByTagName('audio'));
     let videos = Array.from(document.getElementsByTagName('video'));
     
-    const mono = browser.storage.local.get(["mono"]);
+    const mono = await browser.storage.local.get(["mono"]);
 
     for (let i = 0; i < audios.length; i++) {
         filter(audios[i]);
@@ -22,6 +22,7 @@ window.onload = () => { //On page load, finds all the video and audio elements a
                 contexts[i].resume();
                 
                 if (mono["mono"] == true) {
+                    contexts[i].destination.channelCount = 2; //Done to reset it (there is a strange bug when changing headphones while firefox is open)
                     contexts[i].destination.channelCount = 1;
                 }
             }    
@@ -37,6 +38,7 @@ window.onload = () => { //On page load, finds all the video and audio elements a
                 contexts[i].resume();
                 
                 if (mono["mono"] == true) {
+                    contexts[i].destination.channelCount = 2; //Done to reset it (there is a strange bug when changing headphones while firefox is open)
                     contexts[i].destination.channelCount = 1;
                 }
             }    
@@ -92,6 +94,7 @@ async function filter(instance) { //Filter creation function
     const mono = await browser.storage.local.get(["mono"]);
 
     if (mono["mono"] == true) {
+        context.destination.channelCount = 2; //Done to reset it (there is a strange bug when changing headphones while firefox is open)
         context.destination.channelCount = 1;   
     }
 
