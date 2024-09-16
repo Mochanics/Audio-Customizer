@@ -1,15 +1,17 @@
-<!--Copyright: Mochanics 2023-->
+<!--Copyright: Mochanics 2024-->
 <!doctype html>
 <html>
     <head>
         <meta charset="utf-8" />
-        <link rel="stylesheet" href="styles.css"> 
+        <link rel="stylesheet" href="styles.css">
     </head>
     <body>
-        <div class="settings">
-        <span>MAX: </span><div class="popup"><input class="slider" id="max_slider" type="range" min="0" max="20000" step="1" value="20000" list="tickmarks">
+        <span class="title">Audio Customizer</span>
+        <div class="settings">      
+        <button class="button" id="reset">Reset</button><br> 
+        <span>MAX: </span><div class="popup"><input class="slider" id="max_slider" type="range" min="0" max="20000" step="1" value="20000" list="frequency_tickmarks">
         <span class="popuptext" id="max_value">20000</span></div>
-        <datalist id="tickmarks">
+        <datalist id="frequency_tickmarks">
             <option value="0" label="0"></option>
             <option value="5000" label="5000"></option>
             <option value="10000" label="10000"></option>
@@ -17,20 +19,34 @@
             <option value="20000" label="20000"></option>
         </datalist>
         
-        <span>MIN: </span><div class="popup"><input class="slider" id="min_slider" type="range" min="0" max="20000" step="1" value="0" list="tickmarks">
+        <span>MIN: </span><div class="popup"><input class="slider" id="min_slider" type="range" min="0" max="20000" step="1" value="0" list="frequency_tickmarks">
         <span class="popuptext" id="min_value">20000</span></div>
-        <datalist id="tickmarks">
+        <datalist id="frequency_tickmarks">
             <option value="0" label="0"></option>
             <option value="5000" label="5000"></option>
             <option value="10000" label="10000"></option>
             <option value="15000" label="15000"></option>
             <option value="20000" label="20000"></option>
-        </datalist>
+        </datalist><br>
         
-        <span>Voice Enhancer:</span><input type="checkbox" id="enhancer">
-        <span>Mono Sound:</span><input type="checkbox" id="mono">
+        <span>Voice Enhancer:</span><input type="checkbox" id="enhancer"><br>
+        <span>Mono Sound:</span><input type="checkbox" id="mono"><br><br>
+        
+        <span>Voice Enhancer Gain: </span><div class="popup"><input class="slider" id="enhancer_slider" type="range" min="0" max="40" step="1" value="10" list="gain_tickmarks">
+        <span class="popuptext" id="enhancer_value">40</span></div>
+        <datalist id="gain_tickmarks">
+            <option value="0" label="0"></option>
+            <option value="5" label="5"></option>
+            <option value="10" label="10"></option>
+            <option value="15" label="15"></option>
+            <option value="20" label="20"></option>
+            <option value="25" label="25"></option>
+            <option value="30" label="30"></option>
+            <option value="35" label="35"></option>
+            <option value="40" label="40"></option>
+        </datalist>  
         </div>
-        <span>Version 1.0.2</span>
+        <span>Version 1.1.0</span>
         <script src="popup.js"></script>
     </body>
 </html>

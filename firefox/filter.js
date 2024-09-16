@@ -1,4 +1,4 @@
-//Copyright: Mochanics 2023
+//Copyright: Mochanics 2024
 
 //recommended min: 80 Hz
 //recommended max: 15000 Hz
@@ -81,11 +81,12 @@ async function filter(instance) { //Filter creation function
     highpass3.frequency.value = min_value["min_frequency"];
     
     //Creates the peaking filter, used to boost the typical vocal range frequencies
+    const enhancer_gain = await browser.storage.local.get(["enhancer_gain"]);
     const peaking = context.createBiquadFilter();
     peaking.type = "peaking";
     peaking.frequency.value = 132.5;
     peaking.Q.value = 1;
-    peaking.gain.value = 25;
+    peaking.gain.value = enhancer_gain["enhancer_gain"];
 
     //Connects the filters in order for the given audio context
         const source = context.createMediaElementSource(instance);

@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Audio Customizer",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "description": "An extension for users with specific audio needs. It enables them to tune out low/high frequencies that they might be sensitive to or force stereo audio to come out as mono.",
     "icons": {
         "48": "images/logo-48.ico",

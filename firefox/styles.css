@@ -1,14 +1,25 @@
+/* Copyright: Mochanics 2024 */
+
 body {
     background-color: #E6E9E9;
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+    display: block;
+}
+
+.button {
+    float: right;
 }
 
 .slider {
-	  width: 100%
+    width: 93%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }
 
 .settings {
-	  padding: 50px 50px 50px 50px;
-	  min-width: 300px;
+    padding: 20px 20px 20px 20px;
+    min-width: 400px;
 }
 
 datalist {
@@ -16,6 +27,11 @@ datalist {
     justify-content: space-between;
     color: grey;
     width: 100%;
+}
+
+option {
+    width: 50px;
+    text-align: center;
 }
 
 /* Popup container - can be anything you want */
