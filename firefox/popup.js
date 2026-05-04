@@ -119,6 +119,96 @@ function apply_settings() {
     });
 }
 
+//This normalization function needs to exist because themes can return SIX different color formats: #000, #00000, [r, g, b],  [r, g, b, a], "rgb(r,g,b)", "rgba(r,g,b,a)"
+function toRGBA(color) {
+    //If in array format: [r, g, b] or [r, g, b, a]
+    if (Array.isArray(color)) {
+        const [r, g, b, a = 1] = color;
+        return [r, g, b, a];
+    }
+
+    //If in hex format: #000 or #000000
+    if (typeof color === 'string' && color.startsWith('#')) {
+        const hex = color.slice(1);
+        const full = hex.length === 3
+            ? hex.split('').map(c => c + c).join('') //Expand shorthand
+            : hex;
+        return [
+            parseInt(full.slice(0, 2), 16),
+            parseInt(full.slice(2, 4), 16),
+            parseInt(full.slice(4, 6), 16),
+            1
+        ];
+    }
+
+    //If in rgb or rgba string format: "rgb(r,g,b)", "rgba(r,g,b,a)"
+    if (typeof color === 'string') {
+        const [r, g, b, a = 1] = color.match(/[\d.]+/g).map(Number);
+        return [r, g, b, a];
+    }
+
+    return null;
+}
+
+//Calculates luminance and finds if the color is light or dark (dark is true if less than the tipping point)
+function isColorDark(color) {
+    const rgba = toRGBA(color); //Color normalization
+    const [r, g, b] = rgba //Converts rgba array to actual rgb values
+
+    //Uses the luminance formula from https://www.w3.org/WAI/GL/wiki/Relative_luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    const tippingPoint = 0.5; //Current tipping point
+
+    return luminance < tippingPoint;
+}
+
+//Checks if a color is opaque (transparency is above 0.5)
+function isOpaque(color) {
+    const rgba = toRGBA(color); //Color normalization
+    return rgba !== null && rgba[3] > 0.5; //Checks alpha
+}
+
+//Detects if a theme is dark or light
+function detectDark(theme) {
+    const colors = theme.colors;
+
+    //First checks if any any opaque background colors are dark to infer if custom theme is light or dark. 
+    const bgDark = [colors?.toolbar, colors?.frame, colors?.popup, colors?.ntp_background].filter(isOpaque).map(color => isColorDark(color));
+
+    //Then, check if any text colors are dark to infer if custom theme is light or dark. Useful if previous color elements are transparent.
+    const textDark = [colors?.toolbar_text, colors?.bookmark_text, colors?.tab_background_text].filter(isOpaque).map(color => !isColorDark(color));
+
+    const all = [...bgDark, ...textDark]; //Combining both text and background color signals into one array
+
+    if (all.length === 0) return window.matchMedia('(prefers-color-scheme: dark)').matches; //If no custom theme is used, falls back to OS preference
+    
+    //Get total number of valid darkness signals
+    const darkCount = all.filter(Boolean).length;
+    
+    //Get number of darkness signals that are "true"
+    const confidence = darkCount / all.length; 
+
+    //Only trusting decisive results
+    if (confidence > 0.75) return true;
+    if (confidence < 0.25) return false;
+
+    //If ambiguous, falls back to OS preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+//Runs the theme darkness detection function when popup is open to set the correct css style sheet.
+window.onload = async () => {
+    const theme = await browser.theme.getCurrent();
+
+    const isDark = detectDark(theme);
+    
+    if (isDark) {
+        document.getElementById("style").setAttribute("href", "dark.css");
+    } else {
+        document.getElementById("style").setAttribute("href", "light.css");
+    }
+}
+
 //Runs the update functions when the settings buttons/sliders are updated
 document.getElementById('max_slider').oninput = max_slider;
 document.getElementById('min_slider').oninput = min_slider;

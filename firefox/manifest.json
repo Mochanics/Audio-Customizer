@@ -14,7 +14,7 @@
           "all_frames": true
         }
     ],
-    "permissions": ["storage"],
+    "permissions": ["storage", "theme"],
     "browser_action": {
         "default_title": "Frequency Limiter Parameters",
         "default_popup": "menu.html"
