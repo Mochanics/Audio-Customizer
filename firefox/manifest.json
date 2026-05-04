@@ -9,9 +9,9 @@
     },
     "content_scripts": [
         {
-          "matches": ["*://*/*"],
-          "js": ["filter.js"],
-          "all_frames": true
+            "matches": ["*://*/*"],
+            "js": ["filter.js"],
+            "all_frames": true
         }
     ],
     "permissions": ["storage", "theme"],
@@ -20,8 +20,8 @@
         "default_popup": "menu.html"
     },
     "background": {
-    "scripts": ["background.js"],
-    "persistent": false,
-    "type": "module"
+        "scripts": ["background.js"],
+        "persistent": false,
+        "type": "module"
     }
 }
