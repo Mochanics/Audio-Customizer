@@ -1,4 +1,4 @@
-//Copyright: Mochanics 2024
+//Copyright: Mochanics 2026
 
 //Function to resert the settings to their default values
 function reset() {
