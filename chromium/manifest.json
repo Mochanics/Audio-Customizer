@@ -1,5 +1,5 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "Audio Customizer",
     "version": "1.2.0",
     "description": "An extension for users with specific audio needs. It enables them to tune out low/high frequencies that they might be sensitive to or force stereo audio to come out as mono.",
@@ -14,14 +14,13 @@
             "all_frames": true
         }
     ],
-    "permissions": ["storage", "theme"],
-    "browser_action": {
+    "permissions": ["storage"],
+    "action": {
         "default_title": "Frequency Limiter Parameters",
         "default_popup": "menu.html"
     },
     "background": {
-        "scripts": ["background.js"],
-        "persistent": false,
+        "service_worker": "background.js",
         "type": "module"
     }
 }
