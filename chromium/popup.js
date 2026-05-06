@@ -111,12 +111,12 @@ chrome.storage.local.get(["mono"], (mono) => {
 });
 
 //Sends the "reset" message to all the browser tabs when the settings are changed to restart the filter.js files running on them
-function apply_settings() {
-    chrome.tabs.query({}, tabs => {
-        tabs.forEach(tab => {
-        chrome.tabs.sendMessage(tab.id, "reset");
-      });
-    });
+async function apply_settings() {
+    const tabs = await chrome.tabs.query({});
+
+    await Promise.allSettled(
+        tabs.map(tab => chrome.tabs.sendMessage(tab.id, "reset").catch(() => {})) //The catch statement is to ignore when sending the reset message fails on a tab (usually on "secure pages" such as "chrome://"
+    );
 }
 
 //Detects if a theme is dark or light. Far less advanced than the Firefox version but sadly Chromium is more limited.
