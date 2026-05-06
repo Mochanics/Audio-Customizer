@@ -112,10 +112,10 @@ browser.storage.local.get(["mono"], (mono) => {
 
 //Sends the "reset" message to all the browser tabs when the settings are changed to restart the filter.js files running on them
 async function apply_settings() {
-    const tabs = await chrome.tabs.query({});
+    const tabs = await browser.tabs.query({});
 
     await Promise.allSettled(
-        tabs.map(tab => chrome.tabs.sendMessage(tab.id, "reset").catch(() => {})) //The catch statement is to ignore when sending the reset message fails on a tab (usually on "secure pages" such as "chrome://"
+        tabs.map(tab => browser.tabs.sendMessage(tab.id, "reset").catch(() => {})) //The catch statement is to ignore when sending the reset message fails on a tab (usually on "secure pages" such as "about:debugging"
     );
 }
 

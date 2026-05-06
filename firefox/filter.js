@@ -8,7 +8,17 @@
 const elementState = new WeakMap(); //Storing the context and original source for a given element
 let mediaElements = []; //Array storing all media elements.
 
-window.onload = async () => { //On page load, finds all the video and audio elements and creates the filter for each one of them
+//Guards against window.onload already having fired in Firefox
+function onReady(fn) {
+    if (document.readyState === 'complete' || document.readyState === 'interactive') { //If the window.onload even has already fired.
+        fn(); //Calls the passed anonymous function immediately.
+    } else {
+        window.addEventListener('load', fn, { once: true }); //Calls the anonymous function when load is fired.
+    }
+}
+
+//On page load, finds all the video and audio elements and creates the filter for each one of them
+onReady(async () => {  //Function anonymous function that is passed to onReady
     const audios = Array.from(document.getElementsByTagName('audio')); //Getting all audio elements
     const videos = Array.from(document.getElementsByTagName('video')); //Getting all video elements
     mediaElements = [...audios, ...videos]; //Combining media elements into one array
@@ -19,32 +29,38 @@ window.onload = async () => { //On page load, finds all the video and audio elem
         //Starts the contexts when a media source plays
         element.onplay = async () => {
             const state = elementState.get(element);
-            if (state) await state.context.resume(); //Resume context on play
+            if (!state) return; //Ignore elements that failed to initialize
+            if (state.context.state === 'suspended') {
+                await state.context.resume(); //Resume context on play
+            }
+            
             await applyMono(element); //Apply mono to the element
         };
     }
-};
+});
 
 //Initiates an element
 async function initElement(element) {
-    const context = new AudioContext();
-    const source = context.createMediaElementSource(element);
-    elementState.set(element, {context, source});
+    try { //Catch any Cross-Origin Resource Sharing (CORS) errors.
+        const context = new AudioContext();
+        const source = context.createMediaElementSource(element);
+        elementState.set(element, {context, source});
     await buildFilterChain(element); //Adds the filter chain to the current element
+    } catch(error) {}
 }
 
 //Filter chain creation function
 async function buildFilterChain(element) {
     const [max_frequency, min_frequency, enhancer, enhancer_gain, mono] = await Promise.all([
-        chrome.storage.local.get(["max_frequency"]), //Gets the float maximum frequency. Above this value, sound is cut off.
-        chrome.storage.local.get(["min_frequency"]), //Gets the float minimum frequency. Below this value, sound is cut off.
-        chrome.storage.local.get(["enhancer"]), //Gets the boolean value for whether the voice boost feature is enabled or not.
-        chrome.storage.local.get(["enhancer_gain"]), //Gets the float value for gain for the voice boost feature.
-        chrome.storage.local.get(["mono"]), //Gets the boolean value for whether the mono feature is enabled or not.
+        browser.storage.local.get(["max_frequency"]), //Gets the float maximum frequency. Above this value, sound is cut off.
+        browser.storage.local.get(["min_frequency"]), //Gets the float minimum frequency. Below this value, sound is cut off.
+        browser.storage.local.get(["enhancer"]), //Gets the boolean value for whether the voice boost feature is enabled or not.
+        browser.storage.local.get(["enhancer_gain"]), //Gets the float value for gain for the voice boost feature.
+        browser.storage.local.get(["mono"]), //Gets the boolean value for whether the mono feature is enabled or not.
     ]);
     
     const state = elementState.get(element);
-    if (!state) return;
+    if (!state) return; //Ignore elements that failed to initialize
     
     const {context, source} = state; //Get element context and source
     
@@ -85,10 +101,16 @@ async function buildFilterChain(element) {
     } else {
         highpassFilters[2].connect(context.destination);
     }
+    
+    //Firefox needs an explicit resume after rebuilding the filters
+    if (context.state === 'running') {
+        await context.suspend();
+        await context.resume();
+    }
 }
 
 //Getting the reset message from the popup.js script (controls the settings). This message is fired every time a plugin setting in changed.
-chrome.runtime.onMessage.addListener(msgObj => {
+browser.runtime.onMessage.addListener(msgObj => {
     if (msgObj == "reset") {
         reset();
     }
@@ -97,8 +119,8 @@ chrome.runtime.onMessage.addListener(msgObj => {
 //Applying mono audio to an element
 async function applyMono(element) {
     const state = elementState.get(element);
-    if (!state) return;
-    const { mono } = await chrome.storage.local.get(["mono"]);
+    if (!state) return; //Ignore elements that failed to initialize
+    const { mono } = await browser.storage.local.get(["mono"]);
     if (mono === true) {
         state.context.destination.channelCount = 2; //Done to reset it (there is a strange bug when changing headphones while firefox is open)
         state.context.destination.channelCount = 1;
