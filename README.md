@@ -3,4 +3,4 @@ An extension for users with specific audio needs. It enables them to tune out lo
 
 More features might be added later as needed. Feel free to propose new features, improvements or bugfixes.
 
-Current version: 1.2.0
+Current version: 2.0.0
